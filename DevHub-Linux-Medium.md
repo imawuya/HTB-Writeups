@@ -61,8 +61,6 @@ root@vps:~/DevHub# ./fscan -h 10.129.5.14 -p 1-65535 -nopoc
 [10.8s] [*] 网站标题 http://10.129.5.14:6274   状态码:200 长度:1234   标题:MCPJam Inspector v1.4.2
 ```
 
-fscan 把 6274 指纹标成 Open Lighting Architecture，但 fscan 最后一行的标题列已经出卖了它——`MCPJam Inspector v1.4.2`。原理是 fscan 指纹靠 banner + 端口号关键词匹配，6274 没特殊 banner 就按端口号误判了。全端口扫描不能只看自动识别，高端口必须逐个手工验证。
-
 先看邮件端口，三个都试了：
 
 ```bash
