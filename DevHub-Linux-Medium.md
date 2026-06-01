@@ -1,7 +1,10 @@
 # HTB DevHub Writeup
 
-> **靶场**: HackTheBox DevHub | **难度**: Medium | **系统**: Ubuntu 22.04 LTS (kernel 5.15.0-179)
-> **靶机 IP**: 10.129.5.14 | **VPS IP**: 10.10.16.214
+> **靶场**: HackTheBox DevHub
+> **难度**: Medium
+> **系统**: Ubuntu 22.04 LTS (kernel 5.15.0-179)
+> **靶机 IP**: 10.129.5.14
+> **VPS IP**: 10.10.16.214
 >
 
 ---
