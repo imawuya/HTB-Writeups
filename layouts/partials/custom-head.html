@@ -1,0 +1,60 @@
+{{/* 自定义 head 注入:把文章目录固定到页面右侧 */}}
+<style>
+  @media (min-width: 1180px) {
+    details.toc {
+      position: fixed;
+      top: 92px;
+      right: 20px;
+      width: 250px;
+      max-height: calc(100vh - 130px);
+      overflow-y: auto;
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid rgba(128, 128, 128, 0.28);
+      border-radius: 8px;
+      background: rgba(128, 128, 128, 0.06);
+      backdrop-filter: blur(6px);
+      font-size: 0.86rem;
+      line-height: 1.55;
+      z-index: 30;
+    }
+
+    details.toc > summary {
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+
+    details.toc ul {
+      margin: 0;
+      padding-left: 1.05em;
+      list-style: none;
+    }
+
+    details.toc ul ul {
+      padding-left: 1em;
+    }
+
+    details.toc li {
+      margin: 0.22em 0;
+    }
+
+    details.toc a {
+      text-decoration: none;
+      opacity: 0.78;
+    }
+
+    details.toc a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    details.toc::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    details.toc::-webkit-scrollbar-thumb {
+      background: rgba(128, 128, 128, 0.4);
+      border-radius: 3px;
+    }
+  }
+</style>
