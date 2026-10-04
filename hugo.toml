@@ -1,0 +1,99 @@
+title = "HTB Writeups"
+baseURL = 'https://imawuya.github.io/htb-writeups/'
+
+# <html lang="">
+locale = 'zh-cn'
+
+# 站点主语言(单语言站点)
+defaultContentLanguage = "zh-cn"
+
+enableEmoji = true
+ignoreErrors = ["additional-script-loading-error"]
+
+# 主题(以 git submodule 方式引入)
+theme = "hugo-blog-awesome"
+
+[services]
+  # 需要统计时填入 G-XXXXXXXXXX,留空即禁用
+  [services.googleAnalytics]
+    id = ''
+  # 需要评论时填入 Disqus shortname,留空即禁用
+  [services.disqus]
+    shortname = ''
+
+[markup]
+  [markup.highlight]
+    noClasses = false
+  [markup.goldmark.renderer]
+    # 允许正文里的原始 HTML
+    unsafe = true
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 4
+    ordered = false
+
+# 分类维度:标签 + 分类
+[taxonomies]
+  tag = 'tags'
+  category = 'categories'
+
+############################## 中文 ################################
+[Languages.zh-cn]
+  label = "中文"
+  locale = "zh-cn"
+  contentDir = "content"
+  weight = 1
+
+  [Languages.zh-cn.menu]
+  [[Languages.zh-cn.menu.main]]
+    pageRef = "/"
+    name = '首页'
+    url = '/'
+    weight = 10
+  [[Languages.zh-cn.menu.main]]
+    pageRef = "posts"
+    name = '文章'
+    url = '/posts/'
+    weight = 20
+  [[Languages.zh-cn.menu.main]]
+    name = '标签'
+    url = '/tags/'
+    weight = 30
+  [[Languages.zh-cn.menu.main]]
+    pageRef = "about"
+    name = '关于'
+    url = '/about/'
+    weight = 40
+
+[Languages.zh-cn.params]
+  sitename = "HTB Writeups"
+  defaultColor = "dark"        # dark / light / auto
+  description = "HTB 靶机通关记录"
+  mainSections = ['posts']
+  toc = true                   # 文章目录
+  tocOpen = false
+  goToTop = true
+  dateFormat = "2006年01月02日"
+  rssFeedDescription = "summary"
+
+[Languages.zh-cn.params.author]
+  avatar = "avatar.jpg"        # 把头像放进 assets/,正方形
+  intro = "HTB Writeups"
+  name = "imawuya"
+  description = "HTB 靶机通关记录"
+
+[Languages.zh-cn.params.webmanifest]
+  name = "HTB Writeups"
+  short_name = "HTB Writeups"
+  theme_color = "#434648"
+  background_color = "#131418"
+  display = "standalone"
+
+# 社交图标
+[[params.socialIcons]]
+name = "github"
+url = "https://github.com/imawuya"
+
+[[params.socialIcons]]
+name = "Rss"
+url = "/index.xml"

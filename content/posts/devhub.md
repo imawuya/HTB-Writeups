@@ -1,4 +1,12 @@
-# HTB DevHub Writeup
+---
+title: "HTB DevHub Writeup"
+date: 2026-05-31
+draft: false
+description: "HTB DevHub 靶机通关记录。6274 端口上的 MCPJam Inspector v1.4.2 未授权 RCE 起手,经 Jupyter Token 泄露、SSH 端口转发、OPSMCP 硬编码 API Key,最终 dump root 私钥提权。"
+tags: ["HTB", "Linux", "Medium", "MCP", "Jupyter", "RCE", "端口转发"]
+categories: ["Writeup"]
+isStarred: false
+---
 
 > **靶场**: HackTheBox DevHub<br>
 > **难度**: Medium<br>
