@@ -3,7 +3,7 @@ title: "Layover - Linux - Medium"
 date: 2026-10-04
 draft: false
 description: "Layover 是一台机场主题的中等难度 Linux 机器。攻击链分三段:先用题目提供的凭据 RDP 登入跳板机,用无线网卡监听 802.11 明文流量获取门户凭据;再通过 Craft CMS 的认证后 RCE 拿到 www-data;最后"
-tags: ["HTB", "Linux", "Medium", "Craft CMS", "CUPS", "802.11", "CVE", "提权"]
+tags: ["Linux"]
 categories: ["Writeup"]
 isStarred: false
 ---
