@@ -21,6 +21,10 @@ isStarred: false
 
 `actuator/heapdump` → H2 明文凭据 → ClickHouse 密码复用 → Kafka 引擎表 → 下游 lxml XXE → `/proc/<PID>/root` 绕过 ProtectHome → SSH 到 svc-infra → ClickHouse 定时任务覆盖 formatter → root。
 
+### 攻击路径
+
+![stream 攻击路径](/images/stream-attack-path.png)
+
 ```text
 80  /actuator/heapdump
       └─> H2 明文凭据 svc_events:Yl4aCgh4y2PnU

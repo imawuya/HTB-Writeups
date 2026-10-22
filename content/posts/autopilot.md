@@ -49,6 +49,10 @@ Nmap done: 1 IP address (1 host up) scanned in 75.32 seconds
 
 > 第一次全端口扫描时目标还没完全起来，结果是 `host-unreach`；重扫才拿到 443。不要看到第一批全 filtered 就判定目标没开。
 
+### 攻击路径
+
+![autopilot 攻击路径](/images/autopilot-attack-path.png)
+
 ### 工具
 
 | 工具 | 用途 |
