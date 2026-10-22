@@ -10,11 +10,17 @@ isStarred: false
 
 Expressway 的入口不在 Web 上——对外只开了 SSH 和 IKE。IKEv1 用了 Aggressive 模式,这种模式会在**认证之前**把 PSK 哈希交出去,离线爆破出预共享密钥后它直接就是 SSH 密码。提权部分则是 sudo 1.9.17 的 CVE-2025-32463。
 
-- **环境**:HTB · Linux · Easy
-- **目标**:`10.10.11.87`
-- **日期**:2025-11-13
+| 项目 | 值 |
+| :--- | :--- |
+| 平台 | Hack The Box |
+| 系统 | Linux |
+| 难度 | Easy |
+| 靶机 IP | 10.10.11.87 |
+| 日期 | 2025-11-13 |
 
----
+## 0. 攻击链总览
+
+对外只开 SSH 和 IKE。IKEv1 Aggressive 模式在认证之前就泄露 PSK 哈希，离线爆破出预共享密钥后它直接就是 SSH 密码；提权走 sudo 1.9.17 的 CVE-2025-32463。
 
 ## 1. 侦察
 
@@ -46,8 +52,6 @@ nmap -A -Pn -sU 10.10.11.87
 ```
 
 `500/udp` 是 IKE(IPsec 的密钥交换)。`4500` 是 NAT-T。这条线基本就是整台机器的入口。
-
----
 
 ## 2. IKE 枚举与 PSK 破解
 
@@ -88,8 +92,6 @@ Ending psk-crack: 8045040 iterations in 15.800 seconds (509190.67 iterations/sec
 
 预共享密钥:**`freakingrockstarontheroad`**。
 
----
-
 ## 3. 初始访问
 
 PSK 直接就是 SSH 密码:
@@ -104,9 +106,7 @@ ssh ike@expressway.htb
 cat user.txt
 ```
 
----
-
-## 4. 权限提升
+## 4. 提权
 
 上传 `linpeas.sh` 跑一遍枚举,关键发现只有一条:
 
@@ -163,8 +163,6 @@ uid=0(root) gid=0(root) groups=0(root),13(proxy),1001(ike)
 ```
 
 root.txt 在 `/root` 下。
-
----
 
 ## 5. 收尾
 

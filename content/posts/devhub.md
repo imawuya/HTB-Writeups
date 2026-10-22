@@ -8,16 +8,17 @@ categories: ["Writeup"]
 isStarred: false
 ---
 
-> **靶场**: HackTheBox DevHub<br>
-> **难度**: Medium<br>
-> **系统**: Ubuntu 22.04 LTS (kernel 5.15.0-179)<br>
-> **靶机 IP**: 10.129.5.14<br>
-> **VPS IP**: 10.10.16.214
->
+| 项目 | 值 |
+| :--- | :--- |
+| 平台 | Hack The Box |
+| 系统 | Linux（Ubuntu 22.04 LTS，kernel 5.15.0-179） |
+| 难度 | Medium |
+| 靶机 IP | 10.129.5.14 |
+| 日期 | 2026-05-31 |
 
----
+> 攻击机 VPS：`10.10.16.214`
 
-## 概述
+## 0. 攻击链总览
 
 开放 22, 25, 80, 110, 143, 6274 六个端口。入口是 6274 上的 MCPJam Inspector v1.4.2，一个管 MCP Server 的 Web 面板。`/api/mcp/connect` 没认证没校验，直接拿用户传的 `command` + `args` 去 spawn，盲 RCE 拿到 mcp-dev Shell。翻 `ps aux` 发现 Jupyter 命令行里带着明文 Token，SSH 端口转发连上 JupyterLab 后以 analyst 身份拿到 user flag。最后翻 OPSMCP 源码看到硬编码 API Key 和 `ops._admin_dump` 隐藏端点，dump root 私钥直接 ssh root@127.0.0.1 提权。
 
@@ -27,9 +28,31 @@ isStarred: false
 - 25/110/143 邮件端口跑了一圈，POP3/IMAP 匿名登录不通，SMTP 没开放中继，纯干扰。
 - websocket-client 直连 Jupyter WebSocket API，Windows 上 `ws.recv()` 老收不到输出，超时丢消息，折腾半天最后直接浏览器开 JupyterLab UI 反而稳了。
 
----
+### 攻击路径
 
-## 工具清单
+```
+10.129.5.14:6274 (MCPJam Inspector v1.4.2)
+  │
+  ├─ /api/mcp/connect 未认证 RCE (command+args 无校验)
+  │   └─ mcp-dev Shell
+  │       │
+  │       ├─ 写 SSH authorized_keys (Base64 过 JSON)
+  │       │
+  │       ├─ ss -tlnp 发现 localhost:8888 & 5000
+  │       ├─ ps aux 泄露 Jupyter Token
+  │       │   └─ SSH -L 端口转发 -> JupyterLab
+  │       │       └─ cat /home/analyst/user.txt
+  │       │
+  │       └─ cat /opt/opsmcp/server.py
+  │           └─ 硬编码 API Key + ops._admin_dump 隐藏端点
+  │               └─ dump root SSH key -> ssh root@127.0.0.1
+  │                   └─ cat /root/root.txt
+  │
+  ├─ [兔子洞] 25/110/143 邮件端口: 匿名登录全不通
+  └─ [备用] Python3 反弹 Shell
+```
+
+### 工具清单
 
 | 工具 | 用途 |
 |------|------|
@@ -41,11 +64,7 @@ isStarred: false
 | curl.exe | HTTP 请求 (PS 下必须显式 curl.exe 否则走 alias) |
 | 浏览器 | JupyterLab UI 操作 |
 
----
-
-## 攻击步骤
-
-### 第一步：端口扫描
+## 1. 侦察：端口扫描
 
 ```bash
 root@vps:~/DevHub# ./fscan -h 10.129.5.14 -p 1-65535 -nopoc
@@ -81,9 +100,7 @@ Trying 10.129.5.14...
 
 80 端口 302 到 devhub.htb，加 hosts 后浏览器打开首页看到三个服务卡片，确认 6274 是 active、8888 是 internal only。浏览器打开 `http://10.129.5.14:6274/` 看到 SPA 界面标题 MCPJam Inspector v1.4.2。页面底部写 "Ubuntu 24.04"，但后面进 SSH 跑 `uname -a` 是 kernel 5.15.0-179，实际上 Ubuntu 22.04 LTS。
 
----
-
-### 第二步：6274 端口未授权 RCE
+## 2. 初始访问：6274 端口未授权 RCE
 
 浏览器点 Connect 时抓包看到 POST `/api/mcp/connect`，body 里直接带着要启动进程的 `command`、`args`、`env`。后端直接用 `child_process.spawn()` 跑用户给的命令，没有认证也没有输入校验。
 
@@ -135,9 +152,7 @@ mcp-dev@devhub:~$
 
 > 踩坑：PowerShell 5.1 里 `curl` 是 `Invoke-WebRequest` alias，参数不兼容，得用 `curl.exe`。
 
----
-
-### 第三步：内网侦察
+## 3. 横向移动：内网侦察
 
 进去先收信息，三板斧 `id` / `uname -a` / `ss -tlnp` / `ps aux`：
 
@@ -174,9 +189,7 @@ Jupyter 的 `--ServerApp.token` 直接写在进程命令行里。Linux 下任何
 
 OPSMCP 以 root 身份跑，代码路径 `/opt/opsmcp/server.py`，是个自定义 Flask 应用。
 
----
-
-### 第四步：SSH 端口转发 + JupyterLab
+## 4. 横向移动：JupyterLab
 
 新开一个终端连 SSH 转发（原来的 mcp-dev Shell 不用断）：
 
@@ -196,9 +209,7 @@ print(r.stdout.strip())
 
 user flag 在 `/home/analyst/user.txt`。
 
----
-
-### 第五步：OPSMCP 源码审计
+## 5. 提权：OPSMCP 源码审计
 
 JupyterLab 当前身份是 analyst，能直接读自家目录下的 OPSMCP 代码。在 Notebook 里跑：
 
@@ -223,9 +234,7 @@ HIDDEN_TOOLS = {
 
 `HIDDEN_TOOLS` 里的 `ops._admin_dump` 以 `_` 开头，命名约定就是内部用的，不在公开的 tool list 里暴露。参数声明写了 `"target": "string"` 看起来随便传，但翻后面的代码体发现实际用 if/elif 只认三个：`ssh_keys`、`passwords`、`tokens`。源码审计的套路：先扫全局变量找密钥和连接串，再搜 `admin` / `debug` / `_internal` 命名。
 
----
-
-### 第六步：OPSMCP 后门
+## 6. 提权：OPSMCP 后门
 
 端口转发一直开着，直接调 5000：
 
@@ -240,9 +249,7 @@ root@vps:~/DevHub# curl -X POST http://localhost:5000/tools/call \
 
 返回了 `/root/.ssh/id_rsa` 完整私钥。`target=passwords` 也试了，能捞出 mcp-dev 和 analyst 的明文密码，顺手记了下来。
 
----
-
-### 第七步：Root flag
+## 7. 收尾
 
 VPS（Windows）上直接用这个私钥 SSH root 坑了两次：`icacls` 搞不定权限、文件编码导致 `Load key: invalid format`。懒得折腾了，直接在靶机本地操作——mcp-dev 的 Shell 还在，从 localhost 调 OPSMCP API 拿 key 然后 ssh root@127.0.0.1：
 
@@ -266,29 +273,3 @@ root@devhub:~# cat /root/root.txt
 root flag 在 `/root/root.txt`。
 
 > 坑：OpenSSH for Windows 对私钥权限要求极严（必须只有当前用户可读），PowerShell 配不好。以后碰到类似情况直接在靶机本地操作，一个 chmod 600 就过。
-
----
-
-## 攻击树
-
-```
-10.129.5.14:6274 (MCPJam Inspector v1.4.2)
-  │
-  ├─ /api/mcp/connect 未认证 RCE (command+args 无校验)
-  │   └─ mcp-dev Shell
-  │       │
-  │       ├─ 写 SSH authorized_keys (Base64 过 JSON)
-  │       │
-  │       ├─ ss -tlnp 发现 localhost:8888 & 5000
-  │       ├─ ps aux 泄露 Jupyter Token
-  │       │   └─ SSH -L 端口转发 -> JupyterLab
-  │       │       └─ cat /home/analyst/user.txt
-  │       │
-  │       └─ cat /opt/opsmcp/server.py
-  │           └─ 硬编码 API Key + ops._admin_dump 隐藏端点
-  │               └─ dump root SSH key -> ssh root@127.0.0.1
-  │                   └─ cat /root/root.txt
-  │
-  ├─ [兔子洞] 25/110/143 邮件端口: 匿名登录全不通
-  └─ [备用] Python3 反弹 Shell
-```

@@ -11,17 +11,14 @@ isStarred: false
 > 一台围绕航空数据管道搭建的 Linux 机器。入口是一个暴露了 heapdump 的 Spring Boot 网关，凭据在 H2 内存库和 ClickHouse 之间复用；真正的攻击面藏在 Kafka 数据流的下游——一个开了外部实体解析的 Python XML 解析器。拿到文件读取之后，root 是通过一个"每两分钟执行一次 ClickHouse `user_files` 里的脚本"的定时任务拿下的。
 
 | 项目 | 值 |
-|---|---|
+| :--- | :--- |
 | 平台 | Hack The Box |
-| 机器 | Stream |
-| 系统 | Linux / Ubuntu 24.04（kernel 6.8.0-146-generic） |
+| 系统 | Linux（Ubuntu 24.04，kernel 6.8.0-146-generic） |
 | 难度 | Medium |
-| 目标 IP | 10.129.4.241 |
+| 靶机 IP | 10.129.4.241 |
 | 日期 | 2026-10-18 |
 
----
-
-## 攻击链总览
+## 0. 攻击链总览
 
 ```text
 80  /actuator/heapdump
@@ -40,9 +37,7 @@ isStarred: false
                                                                         └─> root 执行 → SUID bash
 ```
 
----
-
-## 0. 工具
+### 工具
 
 - nmap（TCP connect 扫描）
 - ffuf（vhost 枚举）
@@ -50,9 +45,7 @@ isStarred: false
 - Python 3.12（heapdump 字符串提取、payload 构造）
 - ssh
 
----
-
-## 1. 侦查
+## 1. 侦察
 
 ### 1.1 端口扫描
 
@@ -182,8 +175,6 @@ X-ClickHouse-Summary: read_rows:0, read_bytes:0, written_rows:0, written_bytes:0
 ```
 
 **ClickHouse 的 HTTP 接口。** 到这里，攻击面从"一个 Spring Boot 小应用"扩展到"一整套数据栈"。
-
----
 
 ## 2. 枚举
 
@@ -359,8 +350,6 @@ imawuya@htb:~$ curl -s http://10.129.4.241:8081/
 - TLS `ClientHello`
 
 全部 accept 后立即断开。说明是防火墙或监听器的 IP ACL，只允许 127.0.0.1。后来进入机器内部确认了这是一个本地监听，且不在攻击链上。
-
----
 
 ## 3. 初始访问
 
@@ -554,8 +543,6 @@ svc-infra@stream:~$
 
 落入 `svc-infra` shell。
 
----
-
 ## 4. 提权
 
 ### 4.1 枚举
@@ -727,15 +714,13 @@ svc-infra@stream:~$ /tmp/rb -p -c 'id'
 euid=0(root) gid=1000(svc-infra) groups=1000(svc-infra)
 
 svc-infra@stream:~$ /tmp/rb -p -c 'cat /home/martin_cole/user.txt'
-03548d2d5ed3c0b2dfbb6195a0724176
+********************************
 
 svc-infra@stream:~$ /tmp/rb -p -c 'cat /root/root.txt'
-5b07b056cb88b6a3d955e31ecc9cd1aa
+********************************
 ```
 
----
-
-## 5. 复盘
+## 5. 收尾
 
 ### 5.1 环节
 
@@ -771,17 +756,15 @@ svc-infra@stream:~$ /tmp/rb -p -c 'cat /root/root.txt'
 - `clickhouse-client` 的高频进程枚举（`pgrep` 循环）
 - `/var/lib/clickhouse/user_files/*.py` 的内容变更
 
----
-
-## 附录 A 走过的弯路
+## 附录：走过的弯路与兔子洞
 
 > 失败路径同样是攻略的一部分。这一节按时间顺序记录所有被验证为死路的方向，以及是怎么确认它们不可行的。
 
-### A.1 端口扫描全 filtered
+### 坑 1 端口扫描全 filtered
 
 见 [1.1](#11-端口扫描)。根因是 RTT 与默认超时不匹配。**教训：VPN 接入时先测一个已知开放端口，确认扫描器在正确工作，再相信结果。**
 
-### A.2 heapdump 续传损坏
+### 坑 2 heapdump 续传损坏
 
 第一次用 `curl -C -` 分三次下载。拼出来的文件 **84,519,274 字节，比服务端声明的 58,803,940 还大**——因为三次请求拿到的是三个不同的快照，全部叠在了一起。HPROF 解析到中途遇到未知 tag（`0x70`）。
 
@@ -801,7 +784,7 @@ imawuya@htb:~$ curl -sI http://api.htb-airport.htb/actuator/heapdump | grep -i c
 Content-Length: 58803940
 ```
 
-### A.3 爆破 H2 哈希
+### 坑 3 爆破 H2 哈希
 
 从 heapdump 里拿到的是 H2 的 `CREATE USER ... SALT ... HASH ...`，可以先验证算法再用字典试。
 
@@ -811,13 +794,13 @@ Content-Length: 58803940
 
 **教训：在同一个泄露源里，先搜明文再考虑破哈希。** 内存中的配置类通常保留原始字符串。
 
-### A.4 SSH 盲试与 fail2ban
+### 坑 4 SSH 盲试与 fail2ban
 
 在拿到 shell 之前，试过 `svc-infra` / `svc_events` / `svc-events` / `svc_infra` / `svc-ingest` / `svc-aidx` 配合多个候选密码，全部失败，并且触发了 fail2ban——22 端口被 DROP，期间连 80 都不稳定，只能等冷却。
 
 **教训：HTB 机器的用户密码几乎从不靠猜。** 每一次盲试都在制造噪音，而且会锁死后续正路。真正该做的是继续读文件找配置。
 
-### A.5 在 8081 上打 XXE / XInclude / XSLT
+### 坑 5 在 8081 上打 XXE / XInclude / XSLT
 
 这是耗时最多的死路。试过：
 
@@ -830,7 +813,7 @@ Content-Length: 58803940
 
 **教训：在攻击一个 XML 端点之前，先花两分钟确定它到底解析不解析。**
 
-### A.6 盲 XXE 的 OOB 尝试
+### 坑 6 盲 XXE 的 OOB 尝试
 
 在确认解析器存在之后，第一反应是做带外：
 
@@ -842,13 +825,13 @@ Content-Length: 58803940
 
 **结论**：OOB 外带不可用，`file://` 实体读取正常。**转向**：既然带不出去，就用它自己的输出通道。解析器的输出本身就是通道——它把解析结果写回 Kafka，而 ClickHouse 能读 Kafka。
 
-### A.7 34401 协议探测
+### 坑 7 34401 协议探测
 
 见 [2.5](#25-34401-端口)。上面列出的协议逐一试过，全部 accept 后断开。浪费了大约半小时。
 
 **教训：一个"open 但立即 close"的端口，在 HTB 上通常是"只允许本地"的提示，不是谜题。** 应该记录下来、继续往下走，等拿到 shell 再回头看。
 
-### A.8 用 svc_events 写文件
+### 坑 8 用 svc_events 写文件
 
 在 ClickHouse 里试过 `INSERT INTO FUNCTION file(...)` 和 `CREATE TEMPORARY TABLE`，两者都返回 `Code: 497. DB::Exception: Access denied`。
 
@@ -856,7 +839,7 @@ Content-Length: 58803940
 
 **写文件的权限属于 `default`**，而 `default` 的密码要另外拿。
 
-### A.9 /proc/1453/root 之后仍然读不到 user.txt
+### 坑 9 /proc/1453/root 之后仍然读不到 user.txt
 
 绕过 ProtectHome 之后，`/proc/1453/root/home/martin_cole` 仍然返回空。
 
@@ -866,7 +849,7 @@ Content-Length: 58803940
 
 **结论**：命名空间绕过解决的是"看不到"，不是"没权限"。剩下的路只有提权。
 
-### A.10 pgrep 抓不到 drainer
+### 坑 10 pgrep 抓不到 drainer
 
 第一次用 `pgrep -a clickhouse-client`，跑了几个周期什么都没抓到。换成 `pgrep -af clickhouse-client` 后，在 drainer 的一次运行窗口里抓到了完整命令行：
 
@@ -880,9 +863,7 @@ clickhouse-client --user default --password N3v3rs33nD4T4 -q INSERT INTO aidx_op
 
 **顺带一个细节**：即使用了 `-f`，也要在脚本里用 `-a` 打印完整命令行，否则只能看到 PID。真正的命令是 `pgrep -af`。
 
----
-
-## 附录 B 凭据
+### 凭据
 
 | 账号 | 密码/凭据 | 获取位置 | 用途 |
 |---|---|---|---|
@@ -891,9 +872,7 @@ clickhouse-client --user default --password N3v3rs33nD4T4 -q INSERT INTO aidx_op
 | `default` | `N3v3rs33nD4T4` | root drainer 运行时的 `pgrep -af clickhouse-client` | ClickHouse 全权限 + `file()` 写 |
 | `svc_events` H2 哈希 | `SHA256(SHA256(UTF16BE("SVC_EVENTS@..."))) + salt d39d4251fea03bce` | heapdump `CREATE USER IF NOT EXISTS` | 算法验证用 |
 
----
-
-## 附录 C 文件清单
+### 文件清单
 
 | 路径 | 内容 |
 |---|---|

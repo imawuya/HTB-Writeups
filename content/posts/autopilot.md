@@ -8,14 +8,17 @@ categories: ["Writeup"]
 isStarred: false
 ---
 
-| | |
-|---|---|
+Autopilot 是一台 Insane 难度的机器。平台直接给出初始凭据，入口是 openSUSE 的 grommunio 邮件服务器；在 Nextcloud 数据目录里执行 PHP 拿到 shell，劫持 postfix-script 提权。之后从邮件中捞出 AD 凭据，横向进入内网 Windows 域，最后用域管令牌读走 root.txt。
+
+| 项目 | 值 |
+| :--- | :--- |
+| 平台 | Hack The Box |
 | 系统 | Linux 入口 + Windows 内网 |
 | 难度 | Insane |
 | 靶机 IP | 10.129.16.252 |
 | 日期 | 2026-10-18 |
 
-## 0. 基本信息
+## 0. 攻击链总览
 
 平台直接给出初始凭据：
 
@@ -84,7 +87,7 @@ Linux grommunio 6.4.0-150600.23.103-default #1 SMP PREEMPT_DYNAMIC Fri May  8 13
 
 拿到 `grofiles` 的 Web Shell。之后所有横向操作都通过这个 shell 执行，脚本先 base64 传到 `/var/lib/grommunio-files/evil/` 再运行。
 
-## 2. Linux 提权：postfix-script 劫持
+## 2. 提权：postfix-script 劫持
 
 ### 2.1 收集本地配置
 
@@ -154,7 +157,7 @@ grofiles@grommunio:~$ /var/lib/grommunio-files/evil/rb -p -c 'id'
 uid=462(grofiles) gid=462(grofiles) euid=0(root) groups=462(grofiles)
 
 root@grommunio:~# cat /root/user.txt
-b4387ed01ad637d22198f542d98806e5
+********************************
 ```
 
 ## 3. 从邮件里捞 AD 凭据
@@ -389,8 +392,8 @@ imp=True
 cur=AUTOPILOT\da-stephanie.lewis
 dc1=inetpub,PerfLogs,Program Files,Program Files (x86),Users,Windows
 dc2=inetpub,PerfLogs,Program Files,Program Files (x86),Users,Windows
-root1=c1c4cf9e24a3f5e75d7227db7bf32835
-root2=c1c4cf9e24a3f5e75d7227db7bf32835
+root1=********************************
+root2=********************************
 root3err=Cannot find path '\\172.16.20.1\C$\root.txt' because it does not exist.
 reverted
 ```
@@ -401,15 +404,15 @@ reverted
 
 ```console
 root@grommunio:~# cat /root/user.txt
-b4387ed01ad637d22198f542d98806e5
+********************************
 
 root@grommunio:~# grep root1 imp2.txt
-root1=c1c4cf9e24a3f5e75d7227db7bf32835
+root1=********************************
 ```
 
 两个 flag 已推送到钉钉。
 
-## 附：走过的弯路与兔子洞
+## 附录：走过的弯路与兔子洞
 
 ### Linux 侧
 
