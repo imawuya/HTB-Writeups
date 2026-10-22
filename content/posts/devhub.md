@@ -31,6 +31,8 @@ DevHub 是一台 Linux 中等难度机器。入口是 6274 端口上的 MCPJam I
 
 ### 攻击路径
 
+![devhub 攻击路径](/images/devhub-attack-path.png)
+
 ```
 10.129.5.14:6274 (MCPJam Inspector v1.4.2)
   │
