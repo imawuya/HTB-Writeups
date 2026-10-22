@@ -23,7 +23,7 @@ Layover 是一台机场主题的中等难度 Linux 机器。攻击链分三段:�
 
 ### 攻击路径
 
-![layover 攻击路径](/images/layover-attack-path.png)
+![layover 攻击路径](../../images/layover-attack-path.png)
 
 ### 工具
 

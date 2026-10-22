@@ -23,7 +23,7 @@ Management 是一台 Easy 难度的 Linux 机器。前端 bundle 经 AES-GCM 加
 
 ### 攻击路径
 
-![management 攻击路径](/images/management-attack-path.png)
+![management 攻击路径](../../images/management-attack-path.png)
 
 ### 工具
 

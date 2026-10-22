@@ -23,7 +23,7 @@ isStarred: false
 
 ### 攻击路径
 
-![stream 攻击路径](/images/stream-attack-path.png)
+![stream 攻击路径](../../images/stream-attack-path.png)
 
 ```text
 80  /actuator/heapdump

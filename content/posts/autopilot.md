@@ -51,7 +51,7 @@ Nmap done: 1 IP address (1 host up) scanned in 75.32 seconds
 
 ### 攻击路径
 
-![autopilot 攻击路径](/images/autopilot-attack-path.png)
+![autopilot 攻击路径](../../images/autopilot-attack-path.png)
 
 ### 工具
 

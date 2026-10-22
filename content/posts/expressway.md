@@ -23,7 +23,7 @@ Expressway 的入口不在 Web 上——对外只开了 SSH 和 IKE。IKEv1 用�
 
 ### 攻击路径
 
-![expressway 攻击路径](/images/expressway-attack-path.png)
+![expressway 攻击路径](../../images/expressway-attack-path.png)
 
 ### 工具
 
