@@ -19,8 +19,6 @@ isStarred: false
 | 目标 IP | 10.129.4.241 |
 | 日期 | 2026-10-18 |
 
-> 终端约定：`imawuya@htb` 为攻击机（Kali/WSL），`svc-infra@stream` 为靶机 shell。命令块中的输出来自现场记录（`evidence/`）或按其整理，部分为节选；未保留原始输出的步骤以文字描述。
-
 ---
 
 ## 攻击链总览

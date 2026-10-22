@@ -15,8 +15,6 @@ isStarred: false
 | 靶机 IP | 10.129.16.252 |
 | 日期 | 2026-10-18 |
 
-> 本文所有命令块均为 Linux 终端会话：提示符 + 命令 + 实际输出。攻击机用 `imawuya:~$`，落地后的跳板机用 `grofiles@grommunio:~$` / `root@grommunio:~#`；Windows 侧命令与输出统一通过脚本在 Linux 终端里触发和读取。
-
 ## 0. 基本信息
 
 平台直接给出初始凭据：

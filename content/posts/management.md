@@ -15,8 +15,6 @@ isStarred: false
 | 靶机 IP | 10.129.5.96 |
 | 日期 | 2026-10-19 |
 
-> 本文所有命令块均为 Linux 终端会话：提示符 + 命令 + 实际输出。攻击机用 `imawuya:~$`，靶机上用 `openam@management` / `owen@management` / `root@management`。没有留下原始输出的步骤用 `...` 省略，不补造。
-
 ## 0. 侦察
 
 ```console
