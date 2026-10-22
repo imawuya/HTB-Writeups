@@ -16,7 +16,6 @@ isStarred: false
 | 系统 | Linux（Ubuntu 24.04，kernel 6.8.0-146-generic） |
 | 难度 | Medium |
 | 靶机 IP | 10.129.4.241 |
-| 日期 | 2026-10-18 |
 
 ## 0. 攻击链总览
 
@@ -41,11 +40,15 @@ isStarred: false
 
 ### 工具
 
-- nmap（TCP connect 扫描）
-- ffuf（vhost 枚举）
-- curl
-- Python 3.12（heapdump 字符串提取、payload 构造）
-- ssh
+| 工具 | 用途 |
+| :--- | :--- |
+| nmap | 端口扫描 |
+| ffuf | vhost 枚举 |
+| curl | Web 与 API 请求 |
+| clickhouse-client | ClickHouse 查询 |
+| python3 | heapdump 解析、payload 构造 |
+| hashcat | H2 哈希爆破 |
+| ssh | 登录靶机 |
 
 ## 1. 侦察
 

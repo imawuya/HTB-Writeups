@@ -16,11 +16,21 @@ Expressway 的入口不在 Web 上——对外只开了 SSH 和 IKE。IKEv1 用�
 | 系统 | Linux |
 | 难度 | Easy |
 | 靶机 IP | 10.10.11.87 |
-| 日期 | 2025-11-13 |
 
 ## 0. 攻击链总览
 
 对外只开 SSH 和 IKE。IKEv1 Aggressive 模式在认证之前就泄露 PSK 哈希，离线爆破出预共享密钥后它直接就是 SSH 密码；提权走 sudo 1.9.17 的 CVE-2025-32463。
+
+### 工具
+
+| 工具 | 用途 |
+| :--- | :--- |
+| nmap | 端口扫描 |
+| ike-scan | IKE 枚举 |
+| psk-crack | PSK 哈希离线爆破 |
+| wget | 下载提权 exp |
+| gcc | 编译 exp |
+| ssh | 登录靶机 |
 
 ## 1. 侦察
 

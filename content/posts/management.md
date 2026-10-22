@@ -16,11 +16,24 @@ Management 是一台 Easy 难度的 Linux 机器。前端 bundle 经 AES-GCM 加
 | 系统 | Linux（Ubuntu 24.04.5，kernel 6.8.0-139） |
 | 难度 | Easy |
 | 靶机 IP | 10.129.5.96 |
-| 日期 | 2026-10-19 |
 
 ## 0. 攻击链总览
 
 单机靶机。入口是 OpenAM 的预认证反序列化，凭据链从 OpenAM 配置传到 GLPI，最后落在 sudo 通配符上。
+
+### 工具
+
+| 工具 | 用途 |
+| :--- | :--- |
+| nmap | 端口扫描 |
+| vhost 枚举 | 子域发现 |
+| python3 | CVE-2026-33439 反序列化 payload |
+| nuclei | 漏洞模板来源 |
+| ldapsearch | OpenDJ 目录查询 |
+| curl | OpenAM / GLPI 接口 |
+| nc | bind shell |
+| ssh | 登录靶机 |
+| rdiff-backup | sudo 提权 |
 
 ## 1. 侦察
 

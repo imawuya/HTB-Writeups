@@ -16,7 +16,6 @@ Autopilot 是一台 Insane 难度的机器。平台直接给出初始凭据，�
 | 系统 | Linux 入口 + Windows 内网 |
 | 难度 | Insane |
 | 靶机 IP | 10.129.16.252 |
-| 日期 | 2026-10-18 |
 
 ## 0. 攻击链总览
 
@@ -49,6 +48,18 @@ Nmap done: 1 IP address (1 host up) scanned in 75.32 seconds
 ```
 
 > 第一次全端口扫描时目标还没完全起来，结果是 `host-unreach`；重扫才拿到 443。不要看到第一批全 filtered 就判定目标没开。
+
+### 工具
+
+| 工具 | 用途 |
+| :--- | :--- |
+| nmap | 端口与服务扫描 |
+| impacket-secretsdump | 域内哈希 dump |
+| python3 | 凭据解析、AD 攻击脚本 |
+| schtasks | 计划任务当作服务二进制 |
+| runas | 域管令牌执行 |
+| openssl / base64 | 邮件会话与载荷解码 |
+| curl | grommunio / Nextcloud 接口 |
 
 ## 1. 初始访问：Nextcloud 数据目录执行 PHP
 

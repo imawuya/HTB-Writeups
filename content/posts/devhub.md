@@ -16,7 +16,6 @@ DevHub 是一台 Linux 中等难度机器。入口是 6274 端口上的 MCPJam I
 | 系统 | Linux（Ubuntu 22.04 LTS，kernel 5.15.0-179） |
 | 难度 | Medium |
 | 靶机 IP | 10.129.5.14 |
-| 日期 | 2026-05-31 |
 
 > 攻击机 VPS：`10.10.16.214`
 
@@ -54,10 +53,10 @@ DevHub 是一台 Linux 中等难度机器。入口是 6274 端口上的 MCPJam I
   └─ [备用] Python3 反弹 Shell
 ```
 
-### 工具清单
+### 工具
 
 | 工具 | 用途 |
-|------|------|
+| :--- | :--- |
 | fscan | 全端口扫描 |
 | nc | 反弹 Shell 监听 |
 | ssh-keygen | 生成 SSH 密钥对 |

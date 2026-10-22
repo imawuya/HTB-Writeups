@@ -16,13 +16,25 @@ Layover 是一台机场主题的中等难度 Linux 机器。攻击链分三段:�
 | 系统 | Linux |
 | 难度 | Medium |
 | 靶机 IP | 10.129.24.144（airside-ws01） |
-| 日期 | 2026-10-04 |
 
 ## 0. 攻击链总览
 
 三段式：RDP 登入跳板机 → 监听 802.11 明文流量拿到门户凭据 → Craft CMS 后台 RCE 拿下 www-data → CUPS 任意文件写提权到 root。
 
 ![layover 攻击路径](/images/layover-attack-path.png)
+
+### 工具
+
+| 工具 | 用途 |
+| :--- | :--- |
+| nmap | 端口与服务扫描 |
+| xfreerdp | RDP 登入跳板机 |
+| iw / ip | 无线网卡配置 |
+| tshark | 802.11 明文流量监听 |
+| curl | 门户与后台请求 |
+| python3 | 凭据解析、Craft RCE payload |
+| nc | 反弹 shell |
+| ssh | 登录靶机 |
 
 ### 开靶前
 
