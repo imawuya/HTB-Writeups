@@ -29,32 +29,6 @@ DevHub 是一台 Linux 中等难度机器。入口是 6274 端口上的 MCPJam I
 - 25/110/143 邮件端口跑了一圈，POP3/IMAP 匿名登录不通，SMTP 没开放中继，纯干扰。
 - websocket-client 直连 Jupyter WebSocket API，Windows 上 `ws.recv()` 老收不到输出，超时丢消息，折腾半天最后直接浏览器开 JupyterLab UI 反而稳了。
 
-### 攻击路径
-
-![devhub 攻击路径](../../images/devhub-attack-path.png)
-
-```
-10.129.5.14:6274 (MCPJam Inspector v1.4.2)
-  │
-  ├─ /api/mcp/connect 未认证 RCE (command+args 无校验)
-  │   └─ mcp-dev Shell
-  │       │
-  │       ├─ 写 SSH authorized_keys (Base64 过 JSON)
-  │       │
-  │       ├─ ss -tlnp 发现 localhost:8888 & 5000
-  │       ├─ ps aux 泄露 Jupyter Token
-  │       │   └─ SSH -L 端口转发 -> JupyterLab
-  │       │       └─ cat /home/analyst/user.txt
-  │       │
-  │       └─ cat /opt/opsmcp/server.py
-  │           └─ 硬编码 API Key + ops._admin_dump 隐藏端点
-  │               └─ dump root SSH key -> ssh root@127.0.0.1
-  │                   └─ cat /root/root.txt
-  │
-  ├─ [兔子洞] 25/110/143 邮件端口: 匿名登录全不通
-  └─ [备用] Python3 反弹 Shell
-```
-
 ### 工具
 
 | 工具 | 用途 |

@@ -21,10 +21,6 @@ Expressway 的入口不在 Web 上——对外只开了 SSH 和 IKE。IKEv1 用�
 
 对外只开 SSH 和 IKE。IKEv1 Aggressive 模式在认证之前就泄露 PSK 哈希，离线爆破出预共享密钥后它直接就是 SSH 密码；提权走 sudo 1.9.17 的 CVE-2025-32463。
 
-### 攻击路径
-
-![expressway 攻击路径](../../images/expressway-attack-path.png)
-
 ### 工具
 
 | 工具 | 用途 |

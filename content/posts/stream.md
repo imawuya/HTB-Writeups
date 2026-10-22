@@ -21,27 +21,6 @@ isStarred: false
 
 `actuator/heapdump` → H2 明文凭据 → ClickHouse 密码复用 → Kafka 引擎表 → 下游 lxml XXE → `/proc/<PID>/root` 绕过 ProtectHome → SSH 到 svc-infra → ClickHouse 定时任务覆盖 formatter → root。
 
-### 攻击路径
-
-![stream 攻击路径](../../images/stream-attack-path.png)
-
-```text
-80  /actuator/heapdump
-      └─> H2 明文凭据 svc_events:Yl4aCgh4y2PnU
-            └─> 密码复用 → ClickHouse (db.htb-airport.htb)，partner_feed.* 读写
-                  └─> Kafka 引擎表 DDL 暴露数据管道
-                        └─> 8081 是哑管道，真正的 XML 解析器在下游 (aidx-parser)
-                              └─> lxml XXE（file:// 可读）
-                                    └─> 回显通道：实体值 → JSON topic → ClickHouse 可 SELECT
-                                          ├─> /etc/passwd、systemd unit、源码、/opt/* 配置
-                                          └─> /proc/<PID>/root 绕过 ProtectHome
-                                                └─> Kafka JAAS 明文 → ssh svc-infra
-                                                      └─> root 定时任务执行 user_files 下的 Python
-                                                            └─> 抓 argv 得 ClickHouse default 密码
-                                                                  └─> file() 覆盖 formatter
-                                                                        └─> root 执行 → SUID bash
-```
-
 ### 工具
 
 | 工具 | 用途 |
