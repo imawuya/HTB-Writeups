@@ -38,6 +38,16 @@ def main():
         sys.exit("[!] 找不到 " + wk)
     body = open(wk, encoding="utf-8").read()
 
+    # 剥掉源文件自带的 front matter,并把其中的 description 留作默认值
+    src_desc = ""
+    m = re.match(r"^---\s*\n(.*?)\n---\s*\n", body, re.S)
+    if m:
+        fm_text = m.group(1)
+        body = body[m.end():]
+        dm = re.search(r'^description:\s*["\']?(.*?)["\']?\s*$', fm_text, re.M)
+        if dm:
+            src_desc = dm.group(1).strip()
+
     # 去掉开头的 h1 —— 标题由 front matter 提供
     body = re.sub(r"^\s*#\s+.*?\n", "", body, count=1).lstrip("\n")
 
@@ -57,7 +67,7 @@ def main():
 
     tags = [t.strip() for t in a.tags.split(",") if t.strip()]
     cats = [c.strip() for c in a.categories.split(",") if c.strip()]
-    desc = a.description or body.strip().split("\n")[0][:120]
+    desc = a.description or src_desc or body.strip().split("\n")[0][:120]
 
     fm = [
         "---",
