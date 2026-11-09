@@ -6,6 +6,10 @@ description: "Management 是一台 Easy 难度的 Linux 机器。前端 bundle �
 tags: ["Linux"]
 categories: ["Writeup"]
 isStarred: false
+os: Linux
+difficulty: Easy
+machine: Management
+chain: "bundle 解包 → OpenAM 反序列化 → OpenDJ LDIF → GLPI 凭据 → SSH 复用"
 ---
 
 Management 是一台 Easy 难度的 Linux 机器。前端 bundle 经 AES-GCM 加密后 eval，解出的 Client login 通向 OpenAM，用 CVE-2026-33439 拿到立足点；再从 OpenAM 配置解出凭据，密码在 GLPI 上复用，最后用 sudo rdiff-backup 的参数覆盖提权到 root。

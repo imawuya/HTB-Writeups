@@ -1,11 +1,15 @@
 ---
-title: "HTB Takeoff Writeup"
+title: "Takeoff - Linux - Hard"
 date: 2026-11-04
 draft: false
 description: "航空订票系统把工单备注交给 Go text/template 渲染进 PDF，构成模板注入与任意文件读；用泄露的 HMAC 密钥伪造登机牌二维码，触发签到流程里的命令拼接拿到 www-data；再借 n8n 的公开 API 在容器内取得 root，最后利用容器对宿主家目录的挂载与属主权限制造 SUID 完成提权。"
 tags: ["HTB", "Linux", "Hard", "SSTI", "Go", "Docker"]
 categories: ["Writeup"]
 isStarred: false
+os: Linux
+difficulty: Hard
+machine: Takeoff
+chain: "Go 模板注入 → HMAC 重签 → n8n API → 挂载 SUID"
 ---
 
 Takeoff 是一台围绕航空订票系统搭建的 Linux 靶机。前台是一个用 Go 与 Echo 编写的订票站点，功能覆盖航班搜索、选座、支付和登机牌生成。真正的问题出在工单备注：它会被当成模板源码交给 `text/template` 渲染，而渲染结果只出现在生成的 PDF 里，所以从浏览器页面上看不出任何异常。拿到任意文件读之后，服务单元文件里的两个密钥分别打开了登机牌伪造与 n8n 控制台两道门。

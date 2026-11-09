@@ -6,6 +6,10 @@ description: "HTB DevHub 靶机通关记录。6274 端口上的 MCPJam Inspector
 tags: ["Linux"]
 categories: ["Writeup"]
 isStarred: false
+os: Linux
+difficulty: Medium
+machine: DevHub
+chain: "MCPJam RCE → Jupyter Token → SSH 端口转发 → root 私钥"
 ---
 
 DevHub 是一台 Linux 中等难度机器。入口是 6274 端口上的 MCPJam Inspector v1.4.2，`/api/mcp/connect` 不认证就直接 spawn 用户传入的命令，盲 RCE 拿到 mcp-dev；从 `ps aux` 里翻出 Jupyter Token，端口转发进 JupyterLab 拿到 analyst；最后用 OPSMCP 源码里的硬编码 API Key 和隐藏的 `ops._admin_dump` 端点 dump 出 root 私钥。

@@ -1,11 +1,15 @@
 ---
-title: "HTB DutyBound Writeup"
+title: "DutyBound - Linux - Medium"
 date: 2026-10-28
 draft: false
 description: "机场免税自助结账系统：BCBP 登机牌解析器把最后一段的条件数据拼进 PostgreSQL 的 INSERT 语句，注入后 COPY TO PROGRAM 拿到 postgres，再借 X11 按键注入切到 kiosk，最后用 root 定时脚本里的 eval 提权。"
 tags: ["HTB", "Linux", "Medium", "PostgreSQL", "SQLi", "X11"]
 categories: ["Writeup"]
 isStarred: false
+os: Linux
+difficulty: Medium
+machine: DutyBound
+chain: "登机牌 SQLi → COPY TO PROGRAM → X11 按键注入 → CSV eval 提权"
 ---
 
 DutyBound 是一台围绕机场免税店自助结账机搭建的 Linux 靶机。Web 端只做一件事：读登机牌条码（IATA BCBP），据此判断旅客的目的地和免税资格。解析器写得相当严格，但只要构造出合法的多航段登机牌，最后一段的条件数据就会原样拼进 PostgreSQL 的 INSERT 语句，构成注入点。拿到的 postgres 权限可以通过 X11 接管 kiosk 用户的图形会话，而 kiosk 又在一份 root 定时执行的脚本里留下了 eval。

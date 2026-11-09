@@ -6,6 +6,10 @@ description: "Autopilot 是一台 Insane 难度的机器。平台直接给出初
 tags: ["Windows", "AD"]
 categories: ["Writeup"]
 isStarred: false
+os: Windows
+difficulty: Insane
+machine: Autopilot
+chain: "平台凭据 → WebDAV 上传 PHP → postfix 劫持 → S/MIME 取号 → 令牌窃取"
 ---
 
 Autopilot 是一台 Insane 难度的机器。平台直接给出初始凭据，入口是 openSUSE 的 grommunio 邮件服务器；在 Nextcloud 数据目录里执行 PHP 拿到 shell，劫持 postfix-script 提权。之后从邮件中捞出 AD 凭据，横向进入内网 Windows 域，最后用域管令牌读走 root.txt。

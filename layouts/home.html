@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+{{- $defaultColor := .Site.Params.defaultColor | default "auto" -}}
+
+{{/* allow website developer to enforce default dark mode */}}
+{{- if eq $defaultColor "dark" -}}
+<html lang="{{ .Site.Language.Locale }}" class="dark">
+{{- else if eq $defaultColor "light" -}}
+<html lang="{{ .Site.Language.Locale }}" class="light">
+{{- else -}}
+<html lang="{{ .Site.Language.Locale }}">
+{{- end -}}
+
+{{- partial "head.html" . -}}
+
+<body data-theme="{{ $defaultColor }}" class="notransition">
+    {{- partial "scriptsBodyStart.html" . -}}
+    {{- partial "header.html" . -}}
+    <div class="wrapper">
+        {{ partial "bio" . }}
+        <main aria-label="Content">
+
+            <div class="wx-bar">
+                <div class="wx-grp" id="wx-diff">
+                    <button type="button" data-v="" class="on">全部</button>
+                    <button type="button" data-v="EASY">Easy</button>
+                    <button type="button" data-v="MEDIUM">Medium</button>
+                    <button type="button" data-v="HARD">Hard</button>
+                    <button type="button" data-v="INSANE">Insane</button>
+                </div>
+                <div class="wx-div"></div>
+                <div class="wx-grp" id="wx-os">
+                    <button type="button" data-v="" class="on">全部</button>
+                    <button type="button" data-v="Linux">Linux</button>
+                    <button type="button" data-v="Windows">Windows</button>
+                </div>
+                <div class="wx-right">
+                    <span class="wx-lbl">排序</span>
+                    <div class="wx-grp" id="wx-sort">
+                        <button type="button" data-v="date" class="on">日期</button>
+                        <button type="button" data-v="name">名称</button>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="wx-list" id="wx-list">
+            {{- $pages := where .Site.RegularPages "Type" "in" site.Params.mainSections -}}
+            {{- range $pages.ByDate.Reverse }}
+                {{- $d := .Params.difficulty | default "Medium" -}}
+                <li class="wx-item"
+                    data-diff="{{ upper $d }}"
+                    data-os="{{ .Params.os | default "" }}"
+                    data-ts="{{ .Date.Unix }}"
+                    data-name="{{ .Params.machine | default .Title }}"
+                    data-search="{{ lower (printf "%s %s %s" (.Params.machine | default .Title) (.Params.chain | default "") (delimit .Params.tags " ")) }}">
+                    <a href="{{ .RelPermalink }}" class="wx-link">
+                        <span class="wx-top">
+                            <span class="wx-name">{{ .Params.machine | default .Title }}</span>
+                            <span class="wx-diff d-{{ lower $d }}">{{ $d }}</span>
+                            <span class="wx-meta">{{ with .Params.os }}{{ . }} · {{ end }}{{ .Date.Format "2006年01月02日" }}</span>
+                        </span>
+                        {{- with .Params.chain }}
+                        <span class="wx-chain">{{ . }}</span>
+                        {{- end }}
+                    </a>
+                </li>
+            {{- end }}
+            </ul>
+
+            <p class="wx-empty" id="wx-empty" hidden>没有符合条件的机器</p>
+        </main>
+    </div>
+    {{- partial "footer.html" . -}}
+    {{- partial "scriptsBodyEnd.html" . -}}
+</body>
+
+</html>
+
+<style>
+.wrapper > .author { margin-bottom: 2.4rem; }
+
+.menu .trigger { position: relative; }
+#wx-toggle {
+    display: flex; align-items: center; opacity: .7;
+    margin-right: .6rem; color: #434648;
+}
+#wx-toggle:hover { opacity: 1; }
+#wx-toggle svg { display: block; }
+.wx-searchbox { display: flex; align-items: center; margin-right: .4rem; }
+.wx-searchbox[hidden] { display: none; }
+.wx-searchbox input {
+    font: inherit; font-size: 13px;
+    width: 220px; padding: 5px 10px;
+    border: 1px solid #dfe2e6; border-radius: 6px;
+    background: #fafbfc; color: #434648;
+    outline: none; transition: border-color .12s, background .12s;
+}
+.wx-searchbox input::placeholder { color: #a8adb3; }
+.wx-searchbox input:focus { border-color: #c3c9d0; background: #fff; }
+.menu .trigger.wx-searching .trigger-container { display: none; }
+
+html.dark #wx-toggle { color: #eaeaea; }
+html.dark .wx-searchbox input { border-color: #2a2f38; background: #171b21; color: #eaeaea; }
+html.dark .wx-searchbox input::placeholder { color: #5f6873; }
+html.dark .wx-searchbox input:focus { border-color: #3a414c; background: #1b2027; }
+
+@media (prefers-color-scheme: dark) {
+    html:not(.light) #wx-toggle { color: #eaeaea; }
+    html:not(.light) .wx-searchbox input { border-color: #2a2f38; background: #171b21; color: #eaeaea; }
+    html:not(.light) .wx-searchbox input::placeholder { color: #5f6873; }
+    html:not(.light) .wx-searchbox input:focus { border-color: #3a414c; background: #1b2027; }
+}
+
+.wx-bar {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    font-size: 13px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ececec;
+}
+.wx-grp { display: flex; gap: 2px; }
+.wx-div { width: 1px; height: 14px; background: #ececec; }
+.wx-bar button {
+    font: inherit; color: #6b7886; background: none; border: 0;
+    padding: 4px 8px; border-radius: 5px; cursor: pointer;
+    transition: color .12s, background .12s;
+}
+.wx-bar button:hover { color: #434648; }
+.wx-bar button.on { color: #434648; background: #ececec; }
+.wx-lbl { color: #9aa0a6; font-size: 12px; }
+.wx-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.wx-list { list-style: none; margin: 0; padding: 0; }
+.wx-item { border-bottom: 1px solid #ececec; }
+.wx-item[hidden] { display: none !important; }
+.wx-link {
+    display: block; text-decoration: none; color: inherit;
+    padding: 15px 10px; margin: 0 -10px; border-radius: 6px;
+    transition: background .12s;
+}
+.wx-link:hover { background: #f6f8fa; }
+.wx-top { display: flex; align-items: baseline; gap: 9px; }
+.wx-name { font-size: 15px; font-weight: 700; line-height: 1.5; color: #434648; }
+.wx-diff { font-size: 12.5px; font-weight: 500; }
+.wx-meta { margin-left: auto; font-size: 12.5px; color: #6b7886; white-space: nowrap; }
+.wx-chain {
+    display: block; margin-top: 4px;
+    font-size: 12.5px; line-height: 1.6; color: #6b7886;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.wx-empty { padding: 56px 0; text-align: center; color: #9aa0a6; font-size: 13px; }
+
+.d-easy    { color: #1a7f37; }
+.d-medium  { color: #9a6700; }
+.d-hard    { color: #bc4c00; }
+.d-insane  { color: #cf222e; }
+
+html.dark .wx-bar,
+html.dark .wx-item { border-color: #232730; }
+html.dark .wx-div { background: #1b1d25; }
+html.dark .wx-bar button { color: #767f87; }
+html.dark .wx-bar button:hover { color: #eaeaea; }
+html.dark .wx-bar button.on { color: #eaeaea; background: #252830; }
+html.dark .wx-link:hover { background: #1b1d25; }
+html.dark .wx-name { color: #eaeaea; }
+html.dark .wx-meta,
+html.dark .wx-chain { color: #767f87; }
+html.dark .d-easy   { color: #3fb950; }
+html.dark .d-medium { color: #d29922; }
+html.dark .d-hard   { color: #db6d28; }
+html.dark .d-insane { color: #f85149; }
+
+@media (prefers-color-scheme: dark) {
+    html:not(.light) .wx-bar,
+    html:not(.light) .wx-item { border-color: #232730; }
+    html:not(.light) .wx-div { background: #1b1d25; }
+    html:not(.light) .wx-bar button { color: #767f87; }
+    html:not(.light) .wx-bar button:hover { color: #eaeaea; }
+    html:not(.light) .wx-bar button.on { color: #eaeaea; background: #252830; }
+    html:not(.light) .wx-link:hover { background: #1b1d25; }
+    html:not(.light) .wx-name { color: #eaeaea; }
+    html:not(.light) .wx-meta,
+    html:not(.light) .wx-chain { color: #767f87; }
+    html:not(.light) .d-easy   { color: #3fb950; }
+    html:not(.light) .d-medium { color: #d29922; }
+    html:not(.light) .d-hard   { color: #db6d28; }
+    html:not(.light) .d-insane { color: #f85149; }
+}
+</style>
+
+<script>
+(function () {
+    var list = document.getElementById('wx-list');
+    if (!list) return;
+    var items = Array.prototype.slice.call(list.children);
+    var state = { diff: '', os: '', q: '', sort: 'date' };
+
+    function apply() {
+        var shown = 0;
+        items.forEach(function (li) {
+            var ok = (!state.diff || li.dataset.diff === state.diff) &&
+                     (!state.os || li.dataset.os === state.os) &&
+                     (!state.q || (li.dataset.search || '').indexOf(state.q) !== -1);
+            li.hidden = !ok;
+            if (ok) shown++;
+        });
+        document.getElementById('wx-empty').hidden = shown > 0;
+    }
+
+    function sortBy() {
+        var sorted = items.slice().sort(function (a, b) {
+            if (state.sort === 'name') {
+                return a.dataset.name.localeCompare(b.dataset.name);
+            }
+            return Number(b.dataset.ts) - Number(a.dataset.ts);
+        });
+        sorted.forEach(function (li) { list.appendChild(li); });
+    }
+
+    function wire(groupId, key) {
+        var grp = document.getElementById(groupId);
+        if (!grp) return;
+        grp.addEventListener('click', function (e) {
+            var b = e.target.closest('button');
+            if (!b) return;
+            state[key] = b.dataset.v;
+            Array.prototype.forEach.call(grp.children, function (x) {
+                x.classList.toggle('on', x === b);
+            });
+            apply();
+        });
+    }
+
+    wire('wx-diff', 'diff');
+    wire('wx-os', 'os');
+
+    var qi = document.getElementById('wx-q');
+    var box = document.getElementById('wx-searchbox');
+    var toggle = document.getElementById('wx-toggle');
+    var trigger = document.querySelector('.menu .trigger');
+
+    function openSearch(open) {
+        if (!box || !toggle || !trigger) return;
+        box.hidden = !open;
+        trigger.classList.toggle('wx-searching', open);
+        if (open) { qi.focus(); } else { qi.value = ''; state.q = ''; apply(); }
+    }
+
+    if (toggle) {
+        toggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            openSearch(box.hidden);
+        });
+    }
+    if (qi) {
+        qi.addEventListener('input', function () {
+            state.q = qi.value.trim().toLowerCase();
+            apply();
+        });
+        qi.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') openSearch(false);
+        });
+    }
+
+    // ?d=MEDIUM&o=Linux 可直接打开带筛选的列表
+    var q = new URLSearchParams(location.search);
+    function preset(groupId, key, value) {
+        if (!value) return;
+        var grp = document.getElementById(groupId);
+        var b = Array.prototype.filter.call(grp.children, function (x) {
+            return x.dataset.v === value;
+        })[0];
+        if (!b) return;
+        state[key] = value;
+        Array.prototype.forEach.call(grp.children, function (x) {
+            x.classList.toggle('on', x === b);
+        });
+    }
+    preset('wx-diff', 'diff', q.get('d'));
+    preset('wx-os', 'os', q.get('o'));
+    var qq = q.get('q');
+    if (qq && qi) {
+        qi.value = qq;
+        state.q = qq.trim().toLowerCase();
+        if (box && box.hidden) { box.hidden = false; trigger && trigger.classList.add('wx-searching'); }
+    }
+
+    var sg = document.getElementById('wx-sort');
+    sg.addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b) return;
+        state.sort = b.dataset.v;
+        Array.prototype.forEach.call(sg.children, function (x) {
+            x.classList.toggle('on', x === b);
+        });
+        sortBy();
+    });
+
+    apply();
+})();
+</script>

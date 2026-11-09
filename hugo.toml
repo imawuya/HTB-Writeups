@@ -51,15 +51,6 @@ theme = "hugo-blog-awesome"
     url = '/'
     weight = 10
   [[Languages.zh-cn.menu.main]]
-    pageRef = "posts"
-    name = '文章'
-    url = '/posts/'
-    weight = 20
-  [[Languages.zh-cn.menu.main]]
-    name = '标签'
-    url = '/tags/'
-    weight = 30
-  [[Languages.zh-cn.menu.main]]
     pageRef = "about"
     name = '关于'
     url = '/about/'

@@ -6,6 +6,10 @@ description: "Layover 是一台机场主题的中等难度 Linux 机器。攻击
 tags: ["Linux"]
 categories: ["Writeup"]
 isStarred: false
+os: Linux
+difficulty: Medium
+machine: Layover
+chain: "RDP 跳板 → Wi-Fi 嗅探 → Craft CMS RCE → CUPS 提权"
 ---
 
 Layover 是一台机场主题的中等难度 Linux 机器。攻击链分三段:先用题目提供的凭据 RDP 登入跳板机,用无线网卡监听 802.11 明文流量获取门户凭据;再通过 Craft CMS 的认证后 RCE 拿到 www-data;最后用 CUPS 本地提权至 root。

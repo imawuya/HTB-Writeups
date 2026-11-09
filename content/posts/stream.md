@@ -6,6 +6,10 @@ description: "一台围绕航空数据管道搭建的 Linux 机器。入口是�
 tags: ["Linux"]
 categories: ["Writeup"]
 isStarred: false
+os: Linux
+difficulty: Medium
+machine: Stream
+chain: "heapdump → ClickHouse → Kafka 引擎表 → lxml XXE → formatter 提权"
 ---
 
 > 一台围绕航空数据管道搭建的 Linux 机器。入口是一个暴露了 heapdump 的 Spring Boot 网关，凭据在 H2 内存库和 ClickHouse 之间复用；真正的攻击面藏在 Kafka 数据流的下游——一个开了外部实体解析的 Python XML 解析器。拿到文件读取之后，root 是通过一个"每两分钟执行一次 ClickHouse `user_files` 里的脚本"的定时任务拿下的。

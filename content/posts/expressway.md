@@ -6,6 +6,10 @@ description: "Expressway 靶机通关记录:IKEv1 Aggressive 模式泄露 PSK �
 tags: ["Linux"]
 categories: ["Writeup"]
 isStarred: false
+os: Linux
+difficulty: Easy
+machine: Expressway
+chain: "IKEv1 泄露 PSK → 离线爆破 → SSH 登录 → sudo CVE 提权"
 ---
 
 Expressway 的入口不在 Web 上——对外只开了 SSH 和 IKE。IKEv1 用了 Aggressive 模式,这种模式会在**认证之前**把 PSK 哈希交出去,离线爆破出预共享密钥后它直接就是 SSH 密码。提权部分则是 sudo 1.9.17 的 CVE-2025-32463。
