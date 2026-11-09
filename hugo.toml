@@ -1,5 +1,5 @@
 title = "HTB Writeups"
-baseURL = 'https://imawuya.github.io/htb-writeups/'
+baseURL = 'https://imawuya.github.io/HTB-Writeups/'
 
 # <html lang="">
 locale = 'zh-cn'
